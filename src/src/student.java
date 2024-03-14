@@ -364,7 +364,6 @@ public class student extends javax.swing.JFrame {
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // TODO add your handling code here:
         try {
-
             Connection con;
             PreparedStatement pst;
             con = db.getConnection();
@@ -377,7 +376,7 @@ public class student extends javax.swing.JFrame {
             String contact = txtContactNo.getText().trim();
 
             //update query
-            String query = "update student set name = '" + name + "', department = '" + department + "', year = '" + year + "', email = '" + email + "', contact = '"+contact+"' where s_id = '" + sid + "' ";
+            String query = "update student set name = '" + name + "', department = '" + department + "', year = '" + year + "', email = '" + email + "', contact = '" + contact + "' where s_id = '" + sid + "' ";
 
             pst = con.prepareStatement(query);
             pst.executeUpdate();
@@ -398,12 +397,50 @@ public class student extends javax.swing.JFrame {
             //keypoint asing to name textfeild
             txtName.requestFocus();
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Check The Product Barcode", "Save Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, e);
         }
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
         // TODO add your handling code here:
+        int YesORNo = JOptionPane.showConfirmDialog(null, "Do you want Delete Student Recoreds?", "Delete Option", JOptionPane.YES_NO_OPTION);
+        if (YesORNo == 0) {
+            try {
+                Connection con;
+                PreparedStatement pst;
+                con = db.getConnection();
+
+                int sid = Integer.parseInt(txtsid.getText().trim());
+
+                //delete query
+                String query = "delete from student where s_id = '" + sid + "' ";
+
+                pst = con.prepareStatement(query);
+                pst.executeUpdate();
+
+                //sucess message
+                JOptionPane.showMessageDialog(null, "Student Sucessfully deleted!");
+
+                //clear old data from textfeild
+                clear();
+
+                //refresh table
+                DefaultTableModel model = (DefaultTableModel) tblstudentdetials.getModel();
+                model.setRowCount(0);
+                show_student();
+
+                //curent student id
+                sid();
+                //keypoint asing to name textfeild
+                txtName.requestFocus();
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(null, e);
+            }
+        } else {
+            clear();
+            sid();
+            txtName.requestFocus();
+        }
     }//GEN-LAST:event_jButton3ActionPerformed
 
     private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
