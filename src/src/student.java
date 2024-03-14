@@ -14,6 +14,7 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 
 /**
  *
@@ -27,6 +28,7 @@ public class student extends javax.swing.JFrame {
     public student() {
         initComponents();
         show_student();
+        sid();
     }
 
     public ArrayList<studentCode> studentList() {
@@ -64,6 +66,25 @@ public class student extends javax.swing.JFrame {
         }
     }
 
+    //get latest student id from database
+    public void sid() {
+        try {
+            Connection con;
+            Statement st;
+            con = db.getConnection();
+            st = con.createStatement();
+            String query = "Select s_id from student";
+            PreparedStatement pst = con.prepareStatement(query);
+            ResultSet rs = pst.executeQuery();
+            while (rs.next()) {
+                int sid = rs.getInt("s_id");
+                txtsid.setText(Integer.toString(sid + 1));
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, e);
+        }
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -90,6 +111,7 @@ public class student extends javax.swing.JFrame {
         jButton2 = new javax.swing.JButton();
         jButton3 = new javax.swing.JButton();
         jButton4 = new javax.swing.JButton();
+        txtsid = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -162,6 +184,11 @@ public class student extends javax.swing.JFrame {
                 return canEdit [columnIndex];
             }
         });
+        tblstudentdetials.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tblstudentdetialsMouseClicked(evt);
+            }
+        });
         jScrollPane1.setViewportView(tblstudentdetials);
 
         jButton2.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
@@ -188,6 +215,8 @@ public class student extends javax.swing.JFrame {
             }
         });
 
+        txtsid.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -195,10 +224,6 @@ public class student extends javax.swing.JFrame {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGap(15, 15, 15)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLabel1)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(txtName, javax.swing.GroupLayout.PREFERRED_SIZE, 169, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel2)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -223,7 +248,13 @@ public class student extends javax.swing.JFrame {
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(jButton2)
-                                    .addComponent(jButton4))))))
+                                    .addComponent(jButton4)))))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(txtsid, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(txtName, javax.swing.GroupLayout.DEFAULT_SIZE, 169, Short.MAX_VALUE))))
                 .addGap(18, 18, 18)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 765, Short.MAX_VALUE)
                 .addContainerGap())
@@ -231,7 +262,9 @@ public class student extends javax.swing.JFrame {
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(57, 57, 57)
+                .addGap(29, 29, 29)
+                .addComponent(txtsid, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 490, Short.MAX_VALUE)
                     .addGroup(jPanel1Layout.createSequentialGroup()
@@ -312,6 +345,8 @@ public class student extends javax.swing.JFrame {
             model.setRowCount(0);
             show_student();
 
+            //curent student id
+            sid();
             //keypoint asing to name textfeild
             txtName.requestFocus();
         } catch (Exception e) {
@@ -328,6 +363,43 @@ public class student extends javax.swing.JFrame {
     }
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // TODO add your handling code here:
+        try {
+
+            Connection con;
+            PreparedStatement pst;
+            con = db.getConnection();
+
+            int sid = Integer.parseInt(txtsid.getText().trim());
+            String name = txtName.getText().trim();
+            String department = txtDepartment.getText().trim();
+            int year = Integer.parseInt(txtYear.getText().trim());
+            String email = txtEmail.getText().trim();
+            String contact = txtContactNo.getText().trim();
+
+            //update query
+            String query = "update student set name = '" + name + "', department = '" + department + "', year = '" + year + "', email = '" + email + "', contact = '"+contact+"' where s_id = '" + sid + "' ";
+
+            pst = con.prepareStatement(query);
+            pst.executeUpdate();
+
+            //sucess message
+            JOptionPane.showMessageDialog(null, "Student Sucessfully updeted!");
+
+            //clear old data from textfeild
+            clear();
+
+            //refresh table
+            DefaultTableModel model = (DefaultTableModel) tblstudentdetials.getModel();
+            model.setRowCount(0);
+            show_student();
+
+            //curent student id
+            sid();
+            //keypoint asing to name textfeild
+            txtName.requestFocus();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Check The Product Barcode", "Save Error", JOptionPane.ERROR_MESSAGE);
+        }
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
@@ -367,6 +439,19 @@ public class student extends javax.swing.JFrame {
             txtContactNo.requestFocus();
         }
     }//GEN-LAST:event_txtEmailKeyPressed
+
+    private void tblstudentdetialsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblstudentdetialsMouseClicked
+        // TODO add your handling code here:
+        int i = tblstudentdetials.getSelectedRow();
+        TableModel model = tblstudentdetials.getModel();
+        txtsid.setText(model.getValueAt(i, 0).toString());
+        txtName.setText(model.getValueAt(i, 1).toString());
+        txtDepartment.setText(model.getValueAt(i, 2).toString());
+        txtYear.setText(model.getValueAt(i, 3).toString());
+        txtEmail.setText(model.getValueAt(i, 4).toString());
+        txtContactNo.setText(model.getValueAt(i, 5).toString());
+
+    }//GEN-LAST:event_tblstudentdetialsMouseClicked
 
     /**
      * @param args the command line arguments
@@ -424,5 +509,6 @@ public class student extends javax.swing.JFrame {
     private javax.swing.JTextField txtEmail;
     private javax.swing.JTextField txtName;
     private javax.swing.JTextField txtYear;
+    private javax.swing.JLabel txtsid;
     // End of variables declaration//GEN-END:variables
 }
